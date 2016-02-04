@@ -97,7 +97,7 @@ function movePlayer(state, key){
     var villian = newPosition.content
     console.log("start ", hero.detail.hp, villian.detail.hp, hero.detail.attack, villian.detail.attack)
     villian.detail.hp -= hero.detail.attack
-    console.log(villian.detail)
+    console.log(villian.detail)  
     if (villian.detail.hp > 0) {
       hero.detail.hp -= villian.detail.attack
       console.log("start ", hero.detail.hp, villian.detail.hp)
