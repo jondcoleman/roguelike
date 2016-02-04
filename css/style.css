@@ -1,0 +1,41 @@
+#content {
+  text-align: center;
+}
+
+.gameboard {
+  display: inline
+}
+
+.board-row {
+  height: 50px;
+  padding: 0px;
+}
+
+.board-cell {
+  width: 50px;
+  height: 50px;
+  border: 1px solid black;
+  background-color: white;
+  display: inline-block;
+  color: black;
+}
+
+.orc {
+  background-image: url("https://dl.dropboxusercontent.com/u/600747/Roguelike%20Assets/orc.gif");
+  background-size: cover;
+}
+
+.goblin {
+  background-image: url("https://dl.dropboxusercontent.com/u/600747/Roguelike%20Assets/goblin.gif");
+  background-size: cover;
+}
+
+.minotaur {
+  background-image: url("https://dl.dropboxusercontent.com/u/600747/Roguelike%20Assets/minotaur%20walk.gif");
+  background-size: cover;
+}
+
+.hero {
+  background-image: url("https://dl.dropboxusercontent.com/u/600747/Roguelike%20Assets/run_1.png");
+  background-size: cover;
+}
