@@ -7,35 +7,52 @@
 }
 
 .board-row {
-  height: 50px;
+  height: 40px;
   padding: 0px;
 }
 
 .board-cell {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border: 1px solid black;
-  background-color: white;
+  background-color: lightgrey;
   display: inline-block;
   color: black;
 }
 
+
+
 .orc {
-  background-image: url("https://dl.dropboxusercontent.com/u/600747/Roguelike%20Assets/orc.gif");
+  /*background-image: url("https://dl.dropboxusercontent.com/u/600747/Roguelike%20Assets/orc.gif");*/
+  background-image: url("/img/orc.gif");
   background-size: cover;
 }
 
 .goblin {
-  background-image: url("https://dl.dropboxusercontent.com/u/600747/Roguelike%20Assets/goblin.gif");
+  /*background-image: url("https://dl.dropboxusercontent.com/u/600747/Roguelike%20Assets/goblin.gif");*/
+  background-image: url("/img/goblin.gif");
   background-size: cover;
 }
-
 .minotaur {
-  background-image: url("https://dl.dropboxusercontent.com/u/600747/Roguelike%20Assets/minotaur%20walk.gif");
+  /*background-image: url("https://dl.dropboxusercontent.com/u/600747/Roguelike%20Assets/minotaur%20walk.gif");*/
+  background-image: url("/img/minotaur%20walk.gif");
   background-size: cover;
 }
 
 .hero {
-  background-image: url("https://dl.dropboxusercontent.com/u/600747/Roguelike%20Assets/run_1.png");
+  /*background-image: url("https://dl.dropboxusercontent.com/u/600747/Roguelike%20Assets/run_1.png");*/
+  background-image: url("/img/run_1.png");
   background-size: cover;
+}
+
+.sprite-items {
+  background-image: url("/img/roguelikeitems.png");
+}
+
+.sword {
+  background-position: 0px 320px;
+}
+
+.axe {
+  background-position: -160px 320px;
 }

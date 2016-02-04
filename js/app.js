@@ -60,6 +60,14 @@ function createVillian(villianDetail){
   }
 }
 
+function createWeapon(){
+  var weapons = [{name: 'sword', attack: 5}, {name: 'axe', attack: 9}]
+  return {
+    type: 'weapon',
+    detail: randomItem(weapons)
+  }
+}
+
 function createEmptyCell(){
   return {
     type: 'empty'
@@ -70,9 +78,28 @@ function generateRandomCellContent(){
   var num = Math.random()
   if (num < 0.05) {
     return createRandomVillian()
+  } else if (num < 0.10) {
+    return createWeapon()
   } else {
     return createEmptyCell()
   }
+}
+
+
+function fight(hero, villian){
+  console.log('fight', villian.detail.hp, hero.detail.attack)
+  villian.detail.hp -= hero.detail.attack
+  if (villian.detail.hp > 0) {
+    hero.detail.hp -= villian.detail.attack
+    hero.detail.hp <= 0 ? alert('You died!') : null
+    return false //did not win yet
+  }
+  return true
+}
+
+function getWeapon(weapon, hero){
+  hero.weapon = weapon.detail
+  hero.detail.attack += weapon.detail.attack
 }
 
 function movePlayer(state, key){
@@ -95,17 +122,12 @@ function movePlayer(state, key){
   var newPosition = newState.board[newRow][newCol]
   if (newPosition.content.type === 'villian') {
     var villian = newPosition.content
-    console.log("start ", hero.detail.hp, villian.detail.hp, hero.detail.attack, villian.detail.attack)
-    villian.detail.hp -= hero.detail.attack
-    console.log(villian.detail)  
-    if (villian.detail.hp > 0) {
-      hero.detail.hp -= villian.detail.attack
-      console.log("start ", hero.detail.hp, villian.detail.hp)
-      if (hero.detail.hp <= 0) {
-        alert("You died")
-      }
-      return newState
-    }
+    var fightWon = fight(hero, villian)
+    if (!fightWon) {return newState}
+  }
+  if (newPosition.content.type === 'weapon'){
+    var weapon = newPosition.content
+    getWeapon(weapon, hero)
   }
   curPosition.content = createEmptyCell()
   hero.detail.row = newRow
@@ -133,8 +155,12 @@ var App = React.createClass({
     keys.indexOf(e.keyCode) >= 0 ? this.setState(movePlayer(this.state, e.keyCode)) : null
   },
   render: function(){
-    console.log()
-    return <Board board={this.state.board}></Board>
+    return (
+      <div>
+        <Board board={this.state.board}></Board>
+        <div>{JSON.stringify(this.state.hero)}</div>
+      </div>
+    )
   }
 })
 
@@ -163,6 +189,7 @@ var Cell = React.createClass({
     var content = this.props.cell.content
     var cellClass = "board-cell"
     content.type === 'villian' || content.type === 'hero' ? cellClass += " " + content.detail.name : null
+    content.type === 'weapon' ? cellClass += " sprite-items " + content.detail.name : null
     return <div className={cellClass}></div>
   }
 })
