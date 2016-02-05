@@ -103,7 +103,7 @@ function generateRandomCellContent(){
 
 function getWeapon(weapon, hero){
   hero.detail.weapon = weapon.detail
-  hero.detail.attack += weapon.detail.attack
+  hero.detail.attack = weapon.detail.attack
 }
 
 function getHealth(health, hero){
@@ -113,6 +113,18 @@ function getHealth(health, hero){
     hero.detail.hp += health.detail.hp
   }
 }
+
+function fight(villian, hero){
+  console.log('fight', villian.detail.hp, hero.detail.attack)
+  villian.detail.hp -= hero.detail.attack
+  if (villian.detail.hp > 0) {
+    hero.detail.hp -= villian.detail.attack
+    hero.detail.hp <= 0 ? alert('You died!') : null
+    return false //did not win yet
+  }
+  return true
+}
+
 
 function handleCellContent(content, hero){
   switch (content.type) {
