@@ -1,9 +1,16 @@
 #content {
-  text-align: center;
+  ddtext-align: center;
+}
+
+.hero-detail-container {
+  width: 828px;
+  margin: 0 auto;
+  margin-top: 10px;
 }
 
 .gameboard {
-  display: inline
+  display: inline;
+  text-align: center;
 }
 
 .board-row {
@@ -49,10 +56,18 @@
   background-image: url("/img/roguelikeitems.png");
 }
 
+.sprite-icons {
+  background-image: url("/img/rpgicons.png");
+}
+
 .sword {
   background-position: 0px 320px;
 }
 
 .axe {
   background-position: -160px 320px;
+}
+
+.health {
+  background-position: 0px 0px;
 }

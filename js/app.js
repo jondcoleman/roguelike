@@ -19,25 +19,29 @@ function randomItem(array){
   return array[Math.floor(Math.random() * array.length)]
 }
 
-function initHero(state){
-  var newState = _.cloneDeep(state)
-  var rowIndex = _.random(newState.board.length - 1)
-  var colIndex = _.random(newState.board[0].length - 1)
-  var hero = {
+function initHero(){
+  return {
     type: 'hero',
     detail: {
       name: 'hero',
       xp: 0,
       hp: 100,
-      weapon: undefined,
+      weapon: {name: 'fist'},
       attack: 5,
       level: 1,
-      row: rowIndex,
-      col: colIndex
+      row: undefined,
+      col: undefined
     }
   }
-  newState.hero = hero
-  newState.board[rowIndex][colIndex].content = hero
+}
+
+function placeHero(state){
+  var newState = _.cloneDeep(state)
+  var rowIndex = _.random(newState.board.length - 1)
+  var colIndex = _.random(newState.board[0].length - 1)
+  newState.board[rowIndex][colIndex].content = newState.hero
+  newState.hero.detail.row = rowIndex
+  newState.hero.detail.col = colIndex
   return newState
 }
 
@@ -68,6 +72,16 @@ function createWeapon(){
   }
 }
 
+function createHealth(){
+  return {
+    type: 'health',
+    detail: {
+      name: 'health',
+      hp: 25
+    }
+  }
+}
+
 function createEmptyCell(){
   return {
     type: 'empty'
@@ -76,59 +90,76 @@ function createEmptyCell(){
 
 function generateRandomCellContent(){
   var num = Math.random()
-  if (num < 0.05) {
+  if (num < 0.025) {
     return createRandomVillian()
-  } else if (num < 0.10) {
+  } else if (num < 0.050) {
     return createWeapon()
+  } else if (num < 0.075){
+    return createHealth()
   } else {
     return createEmptyCell()
   }
 }
 
-
-function fight(hero, villian){
-  console.log('fight', villian.detail.hp, hero.detail.attack)
-  villian.detail.hp -= hero.detail.attack
-  if (villian.detail.hp > 0) {
-    hero.detail.hp -= villian.detail.attack
-    hero.detail.hp <= 0 ? alert('You died!') : null
-    return false //did not win yet
-  }
-  return true
-}
-
 function getWeapon(weapon, hero){
-  hero.weapon = weapon.detail
+  hero.detail.weapon = weapon.detail
   hero.detail.attack += weapon.detail.attack
 }
 
+function getHealth(health, hero){
+  if (hero.detail.hp + health.detail.hp >= 100){
+    hero.detail.hp = 100
+  } else {
+    hero.detail.hp += health.detail.hp
+  }
+}
+
+function handleCellContent(content, hero){
+  switch (content.type) {
+    case 'weapon':
+      getWeapon(content, hero)
+      break;
+    case 'health':
+      getHealth(content, hero)
+    default:
+      return
+  }
+}
+
 function movePlayer(state, key){
-  var newState = state // mutating for performance (maybe consider something other than cloneDeep)
+  var newState = state                  // mutating for performance (maybe consider something other than cloneDeep)
   var curPosition = newState.board[newState.hero.detail.row][newState.hero.detail.col]
   var newRow = newState.hero.detail.row
   var newCol = newState.hero.detail.col
   var hero = newState.hero
-  if (key === 37) {
-    newCol--
-  } else if (key === 38) {
-    newRow--
-  } else if (key === 39) {
-    newCol++
-  } else if (key === 40) {
-    newRow++
-  } else {
-    return
+  switch (key) {
+    case 37:
+      newCol--
+      break
+    case 38:
+      newRow--
+      break;
+    case 39:
+      newCol++
+      break;
+    case 40:
+      newRow++
+      break;
+    default:
+      return
   }
+
   var newPosition = newState.board[newRow][newCol]
-  if (newPosition.content.type === 'villian') {
-    var villian = newPosition.content
-    var fightWon = fight(hero, villian)
-    if (!fightWon) {return newState}
+
+  var content = newPosition.content     // handle content for new cell
+
+  if (content.type === 'villian'){      // handle fighting
+    var fightWon = fight(content, hero)
+    if (!fightWon) {return newState}    //don't continue e.g. don't move if the fight hasn't been won yet
+  } else {                              //handle other cell content
+    handleCellContent(content, hero)
   }
-  if (newPosition.content.type === 'weapon'){
-    var weapon = newPosition.content
-    getWeapon(weapon, hero)
-  }
+
   curPosition.content = createEmptyCell()
   hero.detail.row = newRow
   hero.detail.col = newCol
@@ -140,11 +171,12 @@ function movePlayer(state, key){
 var App = React.createClass({
   getInitialState: function(){
     return {
-      board: genBoard(20, 14)
+      board: genBoard(20, 14),
+      hero: initHero()
     }
   },
   componentDidMount: function(){
-    this.setState(initHero(this.state))
+    this.setState(placeHero(this.state))
     document.addEventListener("keydown", this.handleArrowPress)
   },
   componentWillUnmount: function(){
@@ -158,7 +190,25 @@ var App = React.createClass({
     return (
       <div>
         <Board board={this.state.board}></Board>
-        <div>{JSON.stringify(this.state.hero)}</div>
+        <div className="row hero-detail-container">
+          <div className="col-md-4">
+            <ul className="list-group">
+              <li className="list-group-item">Level: {this.state.hero.detail.level}</li>
+              <li className="list-group-item">XP: {this.state.hero.detail.xp}</li>
+            </ul>
+          </div>
+          <div className="col-md-4">
+            <ul className="list-group">
+              <li className="list-group-item">HP: {this.state.hero.detail.hp}</li>
+              <li className="list-group-item">Attack: {this.state.hero.detail.attack}</li>
+            </ul>
+          </div>
+          <div className="col-md-4">
+            <ul className="list-group">
+              <li className="list-group-item">Weapon: {this.state.hero.detail.weapon.name}</li>
+            </ul>
+          </div>
+        </div>
       </div>
     )
   }
@@ -190,6 +240,7 @@ var Cell = React.createClass({
     var cellClass = "board-cell"
     content.type === 'villian' || content.type === 'hero' ? cellClass += " " + content.detail.name : null
     content.type === 'weapon' ? cellClass += " sprite-items " + content.detail.name : null
+    content.type === 'health' ? cellClass += " sprite-icons " + content.detail.name : null
     return <div className={cellClass}></div>
   }
 })
