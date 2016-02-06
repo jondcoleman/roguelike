@@ -190,6 +190,8 @@ function genBoard(width, height) {
 class App extends React.Component {
   constructor() {
     super()
+    this.placeHero = this.placeHero.bind(this)
+    this.handleArrowPress = this.handleArrowPress.bind(this)
     this.state = {
       board: genBoard(20, 14),
       hero: initHero()
