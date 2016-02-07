@@ -1,6 +1,5 @@
 /* global React, ReactDOM, _*/
 /* eslint complexity: [2, 10]*/
-/* eslint no-param-reassign: [0] */
 /* eslint react/prefer-es6-class: [0] */
 /* eslint arrow-body-style: [2, "always"] */
 /* eslint react/no-multi-comp: [0] */
@@ -17,11 +16,25 @@ function initHero() {
       name: 'hero',
       xp: 0,
       hp: 100,
-      weapon: { name: 'fist' },
+      weapon: { detail: { name: 'fist' } },
       attack: 5,
       level: 1,
       row: undefined,
       col: undefined
+    },
+    getWeapon(weapon) {
+      this.detail.weapon = weapon
+      this.detail.attack = weapon.detail.attack
+    },
+    getHealth(health) {
+      if (this.detail.hp + health.detail.hp >= 100) {
+        this.detail.hp = 100
+      } else {
+        this.detail.hp += health.detail.hp
+      }
+    },
+    loseHealth(hp) {
+      this.detail.hp -= hp
     }
   }
 }
@@ -39,7 +52,10 @@ function placeHero(state) {
 function createVillian(villianDetail) {
   return {
     type: 'villian',
-    detail: villianDetail
+    detail: villianDetail,
+    loseHealth(hp) {
+      this.detail.hp -= hp
+    }
   }
 }
 
@@ -56,7 +72,7 @@ function createRandomVillian() {
 }
 
 function createWeapon() {
-  const weapons = [{ name: 'sword', attack: 5 }, { name: 'axe', attack: 9 }]
+  const weapons = [{ name: 'sword', attack: 8 }, { name: 'axe', attack: 11 }]
   return {
     type: 'weapon',
     detail: randomItem(weapons)
@@ -91,24 +107,11 @@ function generateRandomCellContent() {
   return createEmptyCell()
 }
 
-function getWeapon(weapon, hero) {
-  hero.detail.weapon = weapon.detail
-  hero.detail.attack = weapon.detail.attack
-}
-
-function getHealth(health, hero) {
-  if (hero.detail.hp + health.detail.hp >= 100) {
-    hero.detail.hp = 100
-  } else {
-    hero.detail.hp += health.detail.hp
-  }
-}
-
 function fight(villian, hero) {
   // console.log('fight', villian.detail.hp, hero.detail.attack)
-  villian.detail.hp -= hero.detail.attack
+  villian.loseHealth(hero.detail.attack)
   if (villian.detail.hp > 0) {
-    hero.detail.hp -= villian.detail.attack
+    hero.loseHealth(villian.detail.attack)
     if (hero.detail.hp <= 0) alert('You died!')
     return false // did not win yet
   }
@@ -119,10 +122,10 @@ function fight(villian, hero) {
 function handleCellContent(content, hero) {
   switch (content.type) {
     case 'weapon':
-      getWeapon(content, hero)
+      hero.getWeapon(content)
       break
     case 'health':
-      getHealth(content, hero)
+      hero.getHealth(content)
       break
     default:
       return
@@ -231,7 +234,9 @@ class App extends React.Component {
           </div>
           <div className="col-md-4">
             <ul className="list-group">
-              <li className="list-group-item">Weapon: {this.state.hero.detail.weapon.name}</li>
+              <li className="list-group-item">
+                Weapon: {this.state.hero.detail.weapon.detail.name}
+              </li>
             </ul>
           </div>
         </div>
