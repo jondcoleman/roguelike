@@ -27,7 +27,9 @@
   color: black;
 }
 
-
+.wall {
+  background-color: black;
+}
 
 .orc {
   /*background-image: url("https://dl.dropboxusercontent.com/u/600747/Roguelike%20Assets/orc.gif");*/

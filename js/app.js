@@ -4,6 +4,7 @@
 /* eslint arrow-body-style: [2, "always"] */
 /* eslint react/no-multi-comp: [0] */
 
+const damageVariance = .2
 
 function randomItem(array) {
   return array[Math.floor(Math.random() * array.length)]
@@ -43,10 +44,14 @@ function placeHero(state) {
   const newState = _.cloneDeep(state)
   const rowIndex = _.random(newState.board.length - 1)
   const colIndex = _.random(newState.board[0].length - 1)
-  newState.board[rowIndex][colIndex].content = newState.hero
-  newState.hero.detail.row = rowIndex
-  newState.hero.detail.col = colIndex
-  return newState
+  // don't place the hero in a wall
+  if (newState.board[rowIndex][colIndex].content.type !== 'wall') {
+    newState.board[rowIndex][colIndex].content = newState.hero
+    newState.hero.detail.row = rowIndex
+    newState.hero.detail.col = colIndex
+    return newState
+  }
+  return placeHero(state)
 }
 
 function createVillian(villianDetail) {
@@ -107,9 +112,63 @@ function generateRandomCellContent() {
   return createEmptyCell()
 }
 
+function genBoard(width, height) {
+  const board = []
+  for (let i = 0; i < height; i++) {
+    board.push([])
+  }
+  board.forEach((row, index) => {
+    for (let i = 0; i < width; i++) {
+      row.push({
+        row: index,
+        col: i,
+        content: generateRandomCellContent()
+      })
+    }
+  })
+  return board
+}
+
+function genRooms(board, roomCount) {
+  const boardWidth = board[0].length
+  const boardHeight = board.length
+  for (let i = 1; i <= roomCount; i++) {
+    // first coordinates should be randomly generated but not right against tue edge
+    const x1 = _.random(1, boardWidth - 3)
+    const y1 = _.random(1, boardHeight - 3)
+    // second coordinates should be greater than the first and not right against the edge
+    const x2 = _.random(x1 + 1, boardWidth - 2)
+    const y2 = _.random(y1 + 1, boardHeight - 2)
+
+    board.forEach(row => {
+      row.forEach(cell => {
+        if (cell.col >= x1 &&
+            cell.col <= x2 &&
+            cell.row >= y1 &&
+            cell.row <= y2) {
+          cell.content = { type: 'wall' }
+        }
+        return cell
+      })
+      return row
+    })
+  }
+  return board
+}
+
+function placeWalls() {
+  const board = genBoard(20, 14)
+  return genRooms(board, 6)
+  // console.log(board)
+}
+
 function fight(villian, hero) {
   // console.log('fight', villian.detail.hp, hero.detail.attack)
-  villian.loseHealth(hero.detail.attack)
+  const heroMinAttack = hero.detail.attack * (1 - damageVariance)
+  const heroMaxAttack = hero.detail.attack * (1 + damageVariance)
+  const damageToVillian = _.random(heroMinAttack, heroMaxAttack)
+  console.log(damageToVillian)
+  villian.loseHealth(damageToVillian)
   if (villian.detail.hp > 0) {
     hero.loseHealth(villian.detail.attack)
     if (hero.detail.hp <= 0) alert('You died!')
@@ -159,6 +218,10 @@ function movePlayer(state, key) {
 
   const content = newPosition.content     // handle content for new cell
 
+  if (content.type === 'wall') {          // handle wall
+    return newState
+  }
+
   if (content.type === 'villian') {      // handle fighting
     const fightWon = fight(content, hero)
     if (!fightWon) { return newState }    // don't move(continue) if the fight hasn't been won yet
@@ -173,30 +236,13 @@ function movePlayer(state, key) {
   return newState
 }
 
-function genBoard(width, height) {
-  const board = []
-  for (let i = 0; i < height; i++) {
-    board.push([])
-  }
-  board.forEach((row, index) => {
-    for (let i = 0; i < width; i++) {
-      row.push({
-        row: index,
-        col: i,
-        content: generateRandomCellContent()
-      })
-    }
-  })
-  return board
-}
-
 class App extends React.Component {
   constructor() {
     super()
     this.placeHero = this.placeHero.bind(this)
     this.handleArrowPress = this.handleArrowPress.bind(this)
     this.state = {
-      board: genBoard(20, 14),
+      board: placeWalls(),
       hero: initHero()
     }
   }
@@ -212,7 +258,7 @@ class App extends React.Component {
   }
   handleArrowPress(e) {
     const keys = [37, 38, 39, 40]
-    console.log(this.state)
+    // console.log(this.state)
     if (keys.indexOf(e.keyCode) >= 0) this.setState(movePlayer(this.state, e.keyCode))
   }
   render() {
@@ -272,6 +318,8 @@ const Cell = ({ cell }) => {
     cellClass += ` sprite-items ${content.detail.name}`
   } else if (content.type === 'health') {
     cellClass += ` sprite-icons ${content.detail.name}`
+  } else if (content.type === 'wall') {
+    cellClass += ` wall`
   }
   return <div className={cellClass}></div>
 }
