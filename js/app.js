@@ -4,7 +4,7 @@
 /* eslint arrow-body-style: [2, "always"] */
 /* eslint react/no-multi-comp: [0] */
 
-const damageVariance = .2
+const damageVariance = 0.2
 
 function randomItem(array) {
   return array[Math.floor(Math.random() * array.length)]
@@ -162,15 +162,24 @@ function placeWalls() {
   // console.log(board)
 }
 
+function getMaxAttackValues(attackValue) {
+  return {
+    minAttack: attackValue * (1 - damageVariance),
+    maxAttack: attackValue * (1 + damageVariance)
+  }
+}
+
 function fight(villian, hero) {
   // console.log('fight', villian.detail.hp, hero.detail.attack)
-  const heroMinAttack = hero.detail.attack * (1 - damageVariance)
-  const heroMaxAttack = hero.detail.attack * (1 + damageVariance)
-  const damageToVillian = _.random(heroMinAttack, heroMaxAttack)
+  const heroRange = getMaxAttackValues(hero.detail.attack)
+  const villianRange = getMaxAttackValues(villian.detail.attack)
+  const damageToVillian = Math.round(_.random(heroRange.minAttack, heroRange.maxAttack))
+  const damageToHero = Math.round(_.random(villianRange.minAttack, villianRange.maxAttack))
   console.log(damageToVillian)
   villian.loseHealth(damageToVillian)
   if (villian.detail.hp > 0) {
-    hero.loseHealth(villian.detail.attack)
+    hero.loseHealth(damageToHero)
+    console.log(damageToHero)
     if (hero.detail.hp <= 0) alert('You died!')
     return false // did not win yet
   }
@@ -261,7 +270,12 @@ class App extends React.Component {
     // console.log(this.state)
     if (keys.indexOf(e.keyCode) >= 0) this.setState(movePlayer(this.state, e.keyCode))
   }
+  getVisibleBoard() {
+    let visibleBoard = this.state.board.slice(this.state.hero.detail.row - 7, this.state.hero.detail.row + 6)
+    console.log(visibleBoard)
+  }
   render() {
+    this.getVisibleBoard()
     return (
       <div>
         <Board board={this.state.board} />
