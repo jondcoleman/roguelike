@@ -157,7 +157,7 @@ function genRooms(board, roomCount) {
 }
 
 function placeWalls() {
-  const board = genBoard(20, 14)
+  const board = genBoard(40, 28)
   return genRooms(board, 6)
   // console.log(board)
 }
