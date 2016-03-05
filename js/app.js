@@ -270,7 +270,12 @@ class App extends React.Component {
     // console.log(this.state)
     if (keys.indexOf(e.keyCode) >= 0) this.setState(movePlayer(this.state, e.keyCode))
   }
+  getVisibleBoard() {
+    let visibleBoard = this.state.board.slice(this.state.hero.detail.row - 7, this.state.hero.detail.row + 6)
+    console.log(visibleBoard)
+  }
   render() {
+    this.getVisibleBoard()
     return (
       <div>
         <Board board={this.state.board} />
