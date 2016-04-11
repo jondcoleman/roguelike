@@ -1,4 +1,4 @@
-/* global React, ReactDOM, _*/
+/* global React, ReactDOM, _, math*/
 /* eslint complexity: [2, 10]*/
 /* eslint react/prefer-es6-class: [0] */
 /* eslint arrow-body-style: [2, "always"] */
@@ -49,6 +49,7 @@ function placeHero(state) {
     newState.board[rowIndex][colIndex].content = newState.hero
     newState.hero.detail.row = rowIndex
     newState.hero.detail.col = colIndex
+    console.log(newState.hero)
     return newState
   }
   return placeHero(state)
@@ -257,6 +258,7 @@ class App extends React.Component {
   }
   componentDidMount() {
     this.placeHero()
+    this.getVisibleBoard()
     document.addEventListener('keydown', this.handleArrowPress)
   }
   componentWillUnmount() {
@@ -264,6 +266,7 @@ class App extends React.Component {
   }
   placeHero() {
     this.setState(placeHero(this.state))
+    console.log('now', this.state.hero)
   }
   handleArrowPress(e) {
     const keys = [37, 38, 39, 40]
@@ -271,11 +274,20 @@ class App extends React.Component {
     if (keys.indexOf(e.keyCode) >= 0) this.setState(movePlayer(this.state, e.keyCode))
   }
   getVisibleBoard() {
-    let visibleBoard = this.state.board.slice(this.state.hero.detail.row - 7, this.state.hero.detail.row + 6)
+    const boardMatrix = math.matrix(this.state.board)
+    console.log(this.state.hero)
+    const rowLowerRange = this.state.hero.detail.row < 7 ? 7 : this.state.hero.detail.row - 7
+    const rowUpperRange = this.state.hero.detail.row > 22 ? 22 : this.state.hero.detail.row + 6
+    const colLowerRange = this.state.hero.detail.row < 10 ? 10 : this.state.hero.detail.row - 10
+    const colUpperRange = this.state.hero.detail.row > 41 ? 41 : this.state.hero.detail.row + 9
+    console.log(rowLowerRange, rowUpperRange, colLowerRange, colUpperRange)
+    const index1 = math.range(rowLowerRange, rowUpperRange)
+    const index2 = math.range(colLowerRange, colUpperRange)
+    console.log(index1)
+    const visibleBoard = math.subset(boardMatrix, math.index(index1, index2))
     console.log(visibleBoard)
   }
   render() {
-    this.getVisibleBoard()
     return (
       <div>
         <Board board={this.state.board} />
