@@ -96,11 +96,13 @@ function placeHero(state) {
   const newState = _.cloneDeep(state)
   const rowIndex = _.random(newState.board.length - 1)
   const colIndex = _.random(newState.board[0].length - 1)
+  console.log('test')
   // don't place the hero in a wall
   if (newState.board[rowIndex][colIndex].content.type !== 'wall') {
     newState.board[rowIndex][colIndex].content = newState.hero
     newState.hero.detail.row = rowIndex
     newState.hero.detail.col = colIndex
+    console.log(newState)
     return newState
   }
   return placeHero(state)
@@ -293,7 +295,20 @@ class App extends React.Component {
     if (keys.indexOf(e.keyCode) >= 0) this.setState(movePlayer(this.state, e.keyCode))
   }
   getVisibleBoard() {
-    return this.state.board.slice(this.state.hero.detail.row - 7, this.state.hero.detail.row + 6)
+    if (!this.state.hero.detail.row) return []
+    const boardMatrix = math.matrix(this.state.board)
+    console.log(this.state.hero)
+    const rowLowerRange = this.state.hero.detail.row < 7 ? 7 : this.state.hero.detail.row - 7
+    const rowUpperRange = this.state.hero.detail.row > 22 ? 22 : this.state.hero.detail.row + 6
+    const colLowerRange = this.state.hero.detail.row < 10 ? 10 : this.state.hero.detail.row - 10
+    const colUpperRange = this.state.hero.detail.row > 41 ? 41 : this.state.hero.detail.row + 9
+    console.log(rowLowerRange, rowUpperRange, colLowerRange, colUpperRange)
+    const index1 = math.range(rowLowerRange, rowUpperRange)
+    const index2 = math.range(colLowerRange, colUpperRange)
+    console.log(index1, index2)
+    const visibleBoard = math.subset(boardMatrix, math.index(index1, index2))
+    console.log(visibleBoard)
+    return visibleBoard
   }
   render() {
     return (
