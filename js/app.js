@@ -1,10 +1,14 @@
 /* global React, ReactDOM, _*/
 /* eslint complexity: [2, 10]*/
+/* eslint no-param-reassign: [0]*/
 /* eslint react/prefer-es6-class: [0] */
 /* eslint arrow-body-style: [2, "always"] */
 /* eslint react/no-multi-comp: [0] */
+/* eslint max-len: [2, 120] */
 
-const boardTemplate = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+/*eslint-disable */
+const boardTemplate = [
+[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
 [0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,2,1,1,1,1,1,1,1,1,1,2,0,0,0,4,0,0,0,0,0,0,0,0,0,0],
 [0,0,0,0,0,0,0,0,0,0,2,1,1,1,1,1,1,1,2,0,0,0,0,0,0,2,1,1,1,1,1,1,1,1,1,2,0,0,0,4,0,0,0,0,0,0,0,0,0,0],
 [0,0,0,0,0,0,0,0,0,0,2,1,1,1,1,1,1,1,2,0,0,0,0,0,0,2,1,1,1,1,1,1,1,1,1,3,4,4,4,4,0,2,2,2,2,2,2,2,2,2],
@@ -54,7 +58,7 @@ const boardTemplate = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,
 [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1,1,1,1,1,1,1,1,2,0,0,0,0,2,1,1,1,1,1,1,2,4,0,0,4],
 [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1,1,1,1,1,1,1,1,2,0,0,0,0,2,2,2,2,2,2,2,2,4,0,0,4],
 [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4]]
-
+/*eslint-enable */
 
 const damageVariance = 0.2
 
@@ -69,43 +73,77 @@ function initHero() {
       name: 'hero',
       xp: 0,
       hp: 100,
+      maxHP: 100,
       weapon: { detail: { name: 'fist' } },
       attack: 5,
       level: 1,
       row: undefined,
       col: undefined
     },
+    messages: ['Game Initialized'],
     getWeapon(weapon) {
       this.detail.weapon = weapon
-      this.detail.attack = weapon.detail.attack
+      this.detail.attack = weapon.detail.attack * this.detail.level
     },
     getHealth(health) {
-      if (this.detail.hp + health.detail.hp >= 100) {
-        this.detail.hp = 100
+      if (this.detail.hp + health.detail.hp >= this.detail.maxHP) {
+        this.detail.hp = this.detail.maxHP
       } else {
         this.detail.hp += health.detail.hp
       }
     },
     loseHealth(hp) {
       this.detail.hp -= hp
+    },
+    getXP(xp) {
+      this.detail.xp += xp
+      this.checkLevelUp()
+    },
+    checkLevelUp() {
+      if (this.detail.xp > (100 * this.detail.level)) {
+        this.detail.level++
+        this.detail.attack *= this.detail.level
+        this.detail.maxHP += 25
+        this.detail.hp = this.detail.maxHP
+        this.messages.push('Level Up! Attack increased and MaxHP increased by 25!')
+      }
     }
   }
 }
 
-function placeHero(state) {
-  const newState = _.cloneDeep(state)
-  const rowIndex = _.random(newState.board.length - 1)
-  const colIndex = _.random(newState.board[0].length - 1)
-  console.log('test')
-  // don't place the hero in a wall
-  if (newState.board[rowIndex][colIndex].content.type !== 'wall') {
-    newState.board[rowIndex][colIndex].content = newState.hero
-    newState.hero.detail.row = rowIndex
-    newState.hero.detail.col = colIndex
-    console.log(newState)
-    return newState
+function placeCharacter(characterType, state) {
+  const rowIndex = _.random(state.board.length - 1)
+  const colIndex = _.random(state.board[0].length - 1)
+  // don't place the character in a wall
+  if (state.board[rowIndex][colIndex].content.type !== 'wall') {
+    if (characterType === 'hero') {
+      state.board[rowIndex][colIndex].content = state.hero
+      state.hero.detail.row = rowIndex
+      state.hero.detail.col = colIndex
+    } else if (characterType === 'boss') {
+      state.board[rowIndex][colIndex].content = createBoss()
+    }
+    return state
   }
-  return placeHero(state)
+  return placeCharacter(characterType, state)
+}
+
+function placeHero(state) {
+  return placeCharacter('hero', state)
+}
+
+function placeBoss(state) {
+  return placeCharacter('boss', state)
+}
+
+function createBoss() {
+  const bossDetail = {
+    level: 5,
+    name: 'Dragon',
+    attack: 40,
+    hp: 200
+  }
+  return createVillian(bossDetail)
 }
 
 function createVillian(villianDetail) {
@@ -119,13 +157,15 @@ function createVillian(villianDetail) {
 }
 
 function createRandomVillian() {
+  const level = randomItem([1, 2, 3, 4])
   const hpOptions = [15, 20, 25, 30]
   const names = ['orc', 'goblin', 'minotaur']
   const attackOptions = [3, 5, 7, 10]
   const detail = {
+    level,
     name: randomItem(names),
-    hp: randomItem(hpOptions),
-    attack: randomItem(attackOptions)
+    hp: randomItem(hpOptions) * level,
+    attack: randomItem(attackOptions) * level
   }
   return createVillian(detail)
 }
@@ -166,8 +206,8 @@ function generateRandomCellContent() {
   return createEmptyCell()
 }
 
-function genBoard(width, height) {
-  let board = boardTemplate.map((row, index) => {
+function genBoard() {
+  const board = boardTemplate.map((row, index) => {
     return row.map((cell, i) => {
       if (cell !== 0) {
         return {
@@ -195,29 +235,50 @@ function getMaxAttackValues(attackValue) {
 
 function fight(villian, hero) {
   // console.log('fight', villian.detail.hp, hero.detail.attack)
+  const fightBoss = villian.detail.name === 'Dragon'
   const heroRange = getMaxAttackValues(hero.detail.attack)
   const villianRange = getMaxAttackValues(villian.detail.attack)
   const damageToVillian = Math.round(_.random(heroRange.minAttack, heroRange.maxAttack))
   const damageToHero = Math.round(_.random(villianRange.minAttack, villianRange.maxAttack))
-  console.log(damageToVillian)
+  if (fightBoss) {
+    hero.messages.push(`YOU'VE ENCOUNTERED THE BOSS:
+       A ${villian.detail.level} ${villian.detail.name} (HP: ${villian.detail.hp}).`)
+  } else {
+    hero.messages.push(`Fighting a level
+       ${villian.detail.level} ${villian.detail.name} (HP: ${villian.detail.hp}).`)
+  }
   villian.loseHealth(damageToVillian)
   if (villian.detail.hp > 0) {
+    hero.messages.push(`You did ${damageToVillian}
+       damage to the ${villian.detail.name} (HP: ${villian.detail.hp}).`)
     hero.loseHealth(damageToHero)
-    console.log(damageToHero)
-    if (hero.detail.hp <= 0) alert('You died!')
-    return false // did not win yet
+    hero.messages.push(`The ${villian.detail.name} did ${damageToHero} damage to you.`)
+    if (hero.detail.hp <= 0) {
+      hero.messages.push('You died!  Resetting...')
+      return 'reset-death'
+    }
+    return 'lose'
   }
-  return true
+  if (fightBoss) {
+    hero.messages.push('You have defeated the Dragon Boss and have won the game!!  Resetting...')
+    return 'reset-win'
+  }
+  const xpGained = villian.detail.level * 10
+  hero.messages.push(`You defeated the ${villian.detail.name} and gained ${xpGained} XP`)
+  hero.getXP(xpGained)
+  return 'win'
 }
-
 
 function handleCellContent(content, hero) {
   switch (content.type) {
     case 'weapon':
       hero.getWeapon(content)
+      hero.messages.push(`You picked up a Weapon: ${content.detail.name}
+         with average attack power of ${content.detail.attack}`)
       break
     case 'health':
       hero.getHealth(content)
+      hero.messages.push(`You picked up health`)
       break
     default:
       return
@@ -251,17 +312,18 @@ function movePlayer(state, key) {
 
   const content = newPosition.content     // handle content for new cell
 
-  if (content.type === 'wall') {          // handle wall
+  if (content.type === 'wall') { // handle wall
     return newState
-  }
-
-  if (content.type === 'villian') {      // handle fighting
-    const fightWon = fight(content, hero)
-    if (!fightWon) { return newState }    // don't move(continue) if the fight hasn't been won yet
-  } else {                              // handle other cell content
+  } else if (content.type === 'villian') { // handle fighting
+    const fightResult = fight(content, hero)
+    if (fightResult.includes('reset')) {
+      return fightResult
+    } else if (fightResult === 'lose') { // don't move(continue) if the fight hasn't been won yet
+      return newState
+    }
+  } else { // handle other cell content
     handleCellContent(content, hero)
   }
-
   curPosition.content = createEmptyCell()
   hero.detail.row = newRow
   hero.detail.col = newCol
@@ -273,47 +335,116 @@ class App extends React.Component {
   constructor() {
     super()
     this.placeHero = this.placeHero.bind(this)
+    this.placeBoss = this.placeBoss.bind(this)
+    this.reset = this.reset.bind(this)
+    this.closeModal = this.closeModal.bind(this)
     this.handleArrowPress = this.handleArrowPress.bind(this)
     this.state = {
-      board: genBoard(40,30),
-      hero: initHero()
+      board: genBoard(),
+      hero: initHero(),
+      showModal: false,
+      modalMessage: {}
     }
   }
   componentDidMount() {
     this.placeHero()
+    this.placeBoss()
     document.addEventListener('keydown', this.handleArrowPress)
   }
   componentWillUnmount() {
-    // remove event listener
+    document.removeEventListener('keydown', this.handleArrowPress)
+  }
+  getVisibleBoard() {
+    const ranges = { // default ranges
+      rowLowerRange: 0,
+      rowUpperRange: this.state.board.length,
+      colLowerRange: 0,
+      colUpperRange: this.state.board[0].length
+    }
+    // set visible row ranges
+    if (this.state.hero.detail.row < 7) {
+      ranges.rowUpperRange = 14
+    } else if (this.state.hero.detail.row > this.state.board.length - 8) {
+      ranges.rowLowerRange = this.state.board.length - 15
+    } else {
+      ranges.rowLowerRange = this.state.hero.detail.row - 7
+      ranges.rowUpperRange = this.state.hero.detail.row + 7
+    }
+    // set visible column ranges
+    if (this.state.hero.detail.col < 10) {
+      ranges.colUpperRange = 20
+    } else if (this.state.hero.detail.col > this.state.board[0].length - 11) {
+      ranges.colLowerRange = this.state.board[0].length - 21
+    } else {
+      ranges.colLowerRange = this.state.hero.detail.col - 10
+      ranges.colUpperRange = this.state.hero.detail.col + 10
+    }
+
+    // extract visible portion of board
+    let visibleBoard = this.state.board.slice(ranges.rowLowerRange, ranges.rowUpperRange)
+    visibleBoard = visibleBoard.map((row) => {
+      return row.slice(ranges.colLowerRange, ranges.colUpperRange)
+    })
+    return visibleBoard
+  }
+  closeModal() {
+    this.reset()
+  }
+  handleArrowPress(e) {
+    const keys = [37, 38, 39, 40]
+    if (keys.indexOf(e.keyCode) >= 0) {
+      const moveResults = movePlayer(this.state, e.keyCode)
+      if (typeof moveResults === 'string') {
+        if (moveResults === 'reset-death') {
+          this.setState({
+            showModal: true,
+            modalMessage: {
+              title: 'You died!',
+              body: 'Better luck next time!  Close this dialog to begin again.'
+            }
+          })
+        } else {
+          this.setState({
+            showModal: true,
+            modalMessage: {
+              title: 'You won!',
+              body: 'Great job! Close this dialog to begin again.'
+            }
+          })
+        }
+      } else {
+        this.setState(moveResults)
+      }
+    }
+  }
+  reset() {
+    const newState = {
+      hero: initHero(),
+      board: genBoard(),
+      showModal: false,
+      modalMessage: {}
+    }
+    this.setState(newState, () => {
+      this.placeHero()
+      this.placeBoss()
+    })
   }
   placeHero() {
     this.setState(placeHero(this.state))
   }
-  handleArrowPress(e) {
-    const keys = [37, 38, 39, 40]
-    // console.log(this.state)
-    if (keys.indexOf(e.keyCode) >= 0) this.setState(movePlayer(this.state, e.keyCode))
-  }
-  getVisibleBoard() {
-    if (!this.state.hero.detail.row) return []
-    const boardMatrix = math.matrix(this.state.board)
-    console.log(this.state.hero)
-    const rowLowerRange = this.state.hero.detail.row < 7 ? 7 : this.state.hero.detail.row - 7
-    const rowUpperRange = this.state.hero.detail.row > 22 ? 22 : this.state.hero.detail.row + 6
-    const colLowerRange = this.state.hero.detail.row < 10 ? 10 : this.state.hero.detail.row - 10
-    const colUpperRange = this.state.hero.detail.row > 41 ? 41 : this.state.hero.detail.row + 9
-    console.log(rowLowerRange, rowUpperRange, colLowerRange, colUpperRange)
-    const index1 = math.range(rowLowerRange, rowUpperRange)
-    const index2 = math.range(colLowerRange, colUpperRange)
-    console.log(index1, index2)
-    const visibleBoard = math.subset(boardMatrix, math.index(index1, index2))
-    console.log(visibleBoard)
-    return visibleBoard
+  placeBoss() {
+    this.setState(placeBoss(this.state))
   }
   render() {
+    console.log('render', this.state)
+    const visibleBoard = this.getVisibleBoard()
+    // console.log(visibleBoard)
     return (
       <div>
-        <Board board={this.getVisibleBoard()} />
+        {this.state.showModal ?
+          <ResetDialog modalMessage={this.state.modalMessage} closeModal={this.closeModal}/>
+          : null}
+        <Board board={visibleBoard} />
         <div className="row hero-detail-container">
           <div className="col-md-4">
             <ul className="list-group">
@@ -333,6 +464,11 @@ class App extends React.Component {
                 Weapon: {this.state.hero.detail.weapon.detail.name}
               </li>
             </ul>
+          </div>
+        </div>
+        <div className="row hero-detail-container">
+          <div clasName="col-md-12">
+            <Messages messages={this.state.hero.messages}/>
           </div>
         </div>
       </div>
@@ -371,6 +507,35 @@ const Cell = ({ cell }) => {
     cellClass += ` wall`
   }
   return <div className={cellClass}></div>
+}
+
+const Messages = ({ messages }) => {
+  const recentMessages = messages.slice().reverse().slice(0, 8).map((message, index) => {
+    return <li key={index}>{message}</li>
+  })
+  return (
+    <ul className="list-group">
+      {recentMessages}
+    </ul>
+  )
+}
+
+const ResetDialog = ({ modalMessage, closeModal }) => {
+  return (
+      <div className="modal-dialog">
+        <div className="modal-content">
+          <div className="modal-header">
+            <button type="button" className="close" onClick={closeModal}>
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 className="modal-title">{modalMessage.title}</h4>
+          </div>
+          <div className="modal-body">
+            <p>{modalMessage.body}</p>
+          </div>
+        </div>
+      </div>
+  )
 }
 
 const app = React.createElement(App)

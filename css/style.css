@@ -47,6 +47,9 @@
   background-image: url("/img/minotaur%20walk.gif");
   background-size: cover;
 }
+.Dragon {
+  background-color: red;
+}
 
 .hero {
   /*background-image: url("https://dl.dropboxusercontent.com/u/600747/Roguelike%20Assets/run_1.png");*/
