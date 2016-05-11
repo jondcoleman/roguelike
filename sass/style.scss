@@ -1,0 +1,77 @@
+$cell-size: 40px;
+$base-url: "https://dl.dropboxusercontent.com/u/600747/Roguelike%20Assets";
+
+body {
+    text-align: center;
+    padding-bottom: 20px;
+}
+#content {
+    margin-top: 30px;
+    display: inline-block;
+    text-align: initial;
+}
+.site-header {
+    text-align: center;
+}
+.hero-detail-container {
+    margin: 10px;
+    float: left;
+    width: 250px;
+}
+.message-display {
+    /*   margin: 10px 15px; */
+}
+.gameboard {
+    text-align: center;
+    float: left;
+}
+.board-row {
+    height: $cell-size;
+    padding: 0;
+}
+.board-cell {
+    width: $cell-size;
+    height: $cell-size;
+    border: 1px solid black;
+    background-color: lightgrey;
+    display: inline-block;
+    color: black;
+}
+.wall {
+    background-color: black;
+}
+.orc {
+    background-image: url("#{$base-url}/orc.gif");
+    background-size: cover;
+}
+.goblin {
+    background-image: url("#{$base-url}/goblin.gif");
+    background-size: cover;
+}
+.minotaur {
+    background-image: url("#{$base-url}/minotaur%20walk.gif");
+    background-size: cover;
+}
+.Dragon {
+    background-image: url("#{$base-url}/greendragon.gif");
+    background-size: cover;
+}
+.hero {
+    background-image: url("#{$base-url}/run_1.png");
+    background-size: cover;
+}
+.sprite-items {
+    background-image: url("#{$base-url}/roguelikeitems.png");
+}
+.sprite-icons {
+    background-image: url("#{$base-url}/rpgicons.png");
+}
+.sword {
+    background-position: 0 320px;
+}
+.axe {
+    background-position: -160px 320px;
+}
+.health {
+    background-position: 0 0;
+}
