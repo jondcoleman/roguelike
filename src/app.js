@@ -6,6 +6,9 @@
 /* eslint react/no-multi-comp: [0] */
 /* eslint max-len: [2, 120] */
 import { boardTemplate } from './board.js'
+import React from 'react'
+import ReactDOM from 'react-dom'
+import _ from 'lodash'
 
 const damageVariance = 0.2
 

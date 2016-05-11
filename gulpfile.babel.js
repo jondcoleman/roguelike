@@ -4,6 +4,8 @@ import babelify from 'babelify'
 import source from 'vinyl-source-stream'
 import browserify from 'browserify'
 import browserSync from 'browser-sync'
+import streamify from 'gulp-streamify'
+import uglify from 'gulp-uglify'
 
 gulp.task('serve', ['sass'], () => {
   browserSync.init({
@@ -32,6 +34,7 @@ gulp.task('js', () => {
     .transform(babelify)
     .bundle()
     .pipe(source('app.js'))
+    .pipe(streamify(uglify()))
     .pipe(gulp.dest('./dist'))
     .pipe(browserSync.stream())
 })
