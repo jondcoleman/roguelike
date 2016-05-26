@@ -39,4 +39,6 @@ gulp.task('js', () => {
     .pipe(browserSync.stream())
 })
 
+gulp.task('build', ['js', 'sass'])
+
 gulp.task('default', ['js', 'serve'])
